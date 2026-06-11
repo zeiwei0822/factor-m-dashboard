@@ -273,6 +273,28 @@
   .picks tr[data-sid] { cursor:pointer; }
   .clickable { cursor:pointer; }
 
+  /* 交易規則卡 */
+  .rules { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
+  @media (max-width:900px){ .rules { grid-template-columns:1fr; } }
+  .rule {
+    background:var(--card); border:1px solid var(--border); border-radius:16px;
+    padding:18px 20px; display:flex; flex-direction:column;
+  }
+  .rule-head { font-size:15.5px; font-weight:800; margin-bottom:12px; }
+  .rule-head.g { color:var(--green); }
+  .rule-head.r { color:var(--red); }
+  .rule-head.b { color:var(--blue); }
+  .rule ul { list-style:none; display:flex; flex-direction:column; gap:9px; flex:1; }
+  .rule li {
+    font-size:13.5px; color:var(--text); line-height:1.65; padding-left:18px; position:relative;
+  }
+  .rule li::before { content:"›"; position:absolute; left:2px; color:var(--dim); font-weight:700; }
+  .rule li b { color:var(--gold); font-weight:700; }
+  .rule-foot {
+    margin-top:14px; padding-top:12px; border-top:1px solid var(--border);
+    font-size:11.5px; color:var(--muted); line-height:1.7;
+  }
+
   /* 圖表縮放列 */
   .zoombar { position:absolute; top:12px; right:16px; z-index:6; display:flex; gap:6px; }
   .zoombar button {
@@ -344,6 +366,39 @@
   </div>
 
   <div class="badges" id="badges"></div>
+
+  <h2 class="sec">交易規則白話版　<span style="letter-spacing:0;color:var(--dim);text-transform:none">整套系統的決策，三張卡講完</span></h2>
+  <div class="rules">
+    <div class="rule">
+      <div class="rule-head g">🟢 什麼時候買</div>
+      <ul>
+        <li>每月<b>最後交易日</b>收盤後自動評分</li>
+        <li>大盤收盤 <b>站上 60 日均線</b>（綠燈）</li>
+        <li>模型分數<b>全市場前 20 名</b></li>
+        <li>股價 ≥ 10 元、日均成交 ≥ 1000 萬</li>
+      </ul>
+      <div class="rule-foot">四條全過 → 次一交易日早盤買進，每檔 5% 資金</div>
+    </div>
+    <div class="rule">
+      <div class="rule-head r">🔴 什麼時候賣</div>
+      <ul>
+        <li><b>跌出前 20 名</b> → 月底換掉（最常見）</li>
+        <li><b>大盤跌破 60 日線</b>（紅燈）→ 不管個股多強，全部賣光持幣</li>
+        <li>還在榜上 → 續抱，什麼都不做</li>
+      </ul>
+      <div class="rule-foot">⚠ 沒有停損停利：月中漲跌都不動作，等月底重新評分——這是月線系統的紀律，不是疏忽</div>
+    </div>
+    <div class="rule">
+      <div class="rule-head b">🧠 模型在找什麼股票</div>
+      <ul>
+        <li>離 <b>52 週低點夠遠</b>（已證明自己強）</li>
+        <li>過去 <b>3~6 個月持續上漲</b>、月線站上季線</li>
+        <li><b>波動度健康</b>（不要失控飆股）</li>
+        <li>大盤環境配合（多頭結構）</li>
+      </ul>
+      <div class="rule-foot">本質是「中期動能獵手」——分數細節是機器學習黑盒，但它找的型態就是這四條，點開任何持股的 K 線都看得到這個長相</div>
+    </div>
+  </div>
   </div><!-- /tab-overview -->
 
   <div class="tab" id="tab-history">
@@ -420,7 +475,7 @@
   <footer>
     <b>風險聲明</b>：本頁所有數字皆來自歷史回測（含 0.6%/筆 交易成本與漲停可行性檢驗），過去績效不代表未來表現。
     模型每月以最新資料自動重訓；紅燈月份策略為全數持幣。投資一定有風險，請以可承受虧損之資金參與。
-    <br>產生時間 2026-06-11 23:24 ・ 本頁每月由作者手動更新一次
+    <br>產生時間 2026-06-11 23:29 ・ 本頁每月由作者手動更新一次
   </footer>
 </div>
 
