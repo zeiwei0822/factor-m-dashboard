@@ -410,7 +410,7 @@
   <footer>
     <b>風險聲明</b>：本頁所有數字皆來自歷史回測（含 0.6%/筆 交易成本與漲停可行性檢驗），過去績效不代表未來表現。
     模型每月以最新資料自動重訓；紅燈月份策略為全數持幣。投資一定有風險，請以可承受虧損之資金參與。
-    <br>產生時間 2026-06-11 22:32 ・ 本頁每月由作者手動更新一次
+    <br>產生時間 2026-06-11 22:39 ・ 本頁每月由作者手動更新一次
   </footer>
 </div>
 
@@ -892,6 +892,26 @@ function drawK(divId, sid, D, opts){
       font:{color:"#fbbf24",size:10.5}, bgcolor:"rgba(13,19,29,.8)" });
   }
 
+  // 點選月份的邊界與月初/月底價（讓面板數字跟圖完全對上）
+  if (opts.monthMark){
+    const mm = opts.monthMark;
+    for (const xd of [mm.x0, mm.x1]){
+      if (D.d.indexOf(xd) >= 0)
+        shapes.push({ type:"line", xref:"x", x0:xd, x1:xd, yref:"paper",
+          y0:0.46, y1:1, line:{color:"rgba(96,165,250,.55)",width:1.2,dash:"dash"} });
+    }
+    if (D.d.indexOf(mm.x0) >= 0)
+      annotations.push({ x:mm.x0, xref:"x", y:mm.ep, yref:"y",
+        text:`${mm.label} 月初 ${mm.ep}`, showarrow:true, arrowhead:0, ax:-46, ay:-26,
+        font:{color:"#60a5fa",size:10.5}, arrowcolor:"rgba(96,165,250,.6)",
+        bgcolor:"rgba(13,19,29,.85)" });
+    if (D.d.indexOf(mm.x1) >= 0)
+      annotations.push({ x:mm.x1, xref:"x", y:mm.xp, yref:"y",
+        text:`月底 ${mm.xp}`, showarrow:true, arrowhead:0, ax:46, ay:-26,
+        font:{color:"#60a5fa",size:10.5}, arrowcolor:"rgba(96,165,250,.6)",
+        bgcolor:"rgba(13,19,29,.85)" });
+  }
+
   const layout = Object.assign({}, PL, {
     hovermode:"x unified", shapes, annotations,
     xaxis:{gridcolor:GRID, rangeslider:{visible:false}, type:"category",
@@ -969,6 +989,19 @@ async function getK(sid){
   modal.addEventListener("click", e => { if (e.target === modal) close(); });
   document.addEventListener("keydown", e => { if (e.key === "Escape") close(); });
 
+  function holdState(sid, h){
+    // 從連續交易段判斷該月此股的持有狀態
+    const eps = TRADES[sid] || [];
+    const ep = eps.find(e => e[0] <= h.next_date && e[1] >= h.rebal_date);
+    if (!ep) return ["", null];
+    const isNew = ep[0] === h.rebal_date;
+    const isOut = ep[1] === h.next_date;
+    if (isNew && isOut) return ["單月進出", ep];
+    if (isNew) return ["🆕 新進場", ep];
+    if (isOut) return ["🚪 本月出場", ep];
+    return ["⏳ 續抱", ep];
+  }
+
   window.__openMonth = function(m){
     const rows = HOLD[m];
     const h = HIST.find(r=>r.month===m);
@@ -977,16 +1010,19 @@ async function getK(sid){
     mTitle.textContent = `${m} 持股明細（${h.light}燈・當月 ${h.ret_stable>0?"+":""}${h.ret_stable}%・市場中位 ${h.median>0?"+":""}${h.median}%）`;
     let trs = "";
     for (const [rank, sid, ep, xp, mret] of rows){
+      const [state] = holdState(sid, h);
       trs += `<tr data-sid="${sid}" title="點擊看 K 線與進出場位置">
         <td class="rank ${rank===1?'m1':rank===2?'m2':rank===3?'m3':''}">${rank<=3?'★':''} ${rank}</td>
         <td class="sid">${sid}</td>
+        <td class="muted-sm">${state}</td>
         <td class="muted-sm">${ep.toLocaleString()}</td>
         <td class="muted-sm">${xp.toLocaleString()}</td>
         <td style="font-weight:700;color:${mret>=0?'var(--green)':'var(--red)'}">${mret>0?"+":""}${mret.toFixed(1)}%</td>
         <td class="muted-sm">›</td></tr>`;
     }
     mMonth.innerHTML = `<table class="ytable htable">
-      <tr><th>排名</th><th>代號</th><th>月初買進價</th><th>月底價</th><th>當月損益</th><th></th></tr>${trs}</table>
+      <tr><th>排名</th><th>代號</th><th>狀態</th><th>月初價</th><th>月底價</th><th>當月損益</th><th></th></tr>${trs}</table>
+      <div class="note">「月初價→月底價」是<b>當月</b>的區間；續抱股的真正進場點在更早月份——點進 K 線會同時標出兩者。價格為還原權息數值，與當時實際成交價可能略有差異。</div>
       ${h.light==="紅" ? '<div class="note">⚠ 此月為紅燈：實際空手未進場，上表為「若進場」的清單與假設損益</div>' : ''}`;
     mMonth.style.display = "block";
     mStock.style.display = "none";
@@ -1004,16 +1040,31 @@ async function getK(sid){
     try {
       const D = await getK(sid);
       const eps = TRADES[sid] || [];
-      // 聚焦包含該月的交易段
-      let focus = null;
+      let focus = null, monthMark = null, mret = null;
       if (month){
         const mh = HIST.find(r=>r.month===month);
-        if (mh) focus = eps.find(e => e[0] <= mh.next_date && e[1] >= mh.rebal_date) || null;
+        if (mh){
+          focus = eps.find(e => e[0] <= mh.next_date && e[1] >= mh.rebal_date) || null;
+          const row = (HOLD[month]||[]).find(r=>String(r[1])===String(sid));
+          if (row){
+            mret = row[4];
+            monthMark = { x0: mh.rebal_date, x1: mh.next_date,
+                          ep: row[2], xp: row[3], label: month };
+          }
+        }
       }
       const n = eps.length;
       const tot = eps.reduce((s,e)=>s+e[4],0);
-      mTitle.textContent = `${sid}　歷史進出 ${n} 段・累計 ${tot>0?"+":""}${tot.toFixed(1)}%`;
-      drawK("modalchart", sid, D, { episodes: eps, focusEp: focus ? [focus[0], focus[1]] : null });
+      let title = `${sid}　`;
+      if (month && mret != null)
+        title += `${month} 當月 ${mret>0?"+":""}${mret.toFixed(1)}%　｜　`;
+      title += `全部進出 ${n} 段・累計 ${tot>0?"+":""}${tot.toFixed(1)}%`;
+      mTitle.textContent = title;
+      drawK("modalchart", sid, D, {
+        episodes: eps,
+        focusEp: focus ? [focus[0], focus[1]] : null,
+        monthMark,
+      });
     } catch(e) {
       mTitle.textContent = `${sid}　K 線資料載入失敗`;
       document.getElementById("modalchart").innerHTML =
