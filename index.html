@@ -475,7 +475,7 @@
   <footer>
     <b>風險聲明</b>：本頁所有數字皆來自歷史回測（含 0.6%/筆 交易成本與漲停可行性檢驗），過去績效不代表未來表現。
     模型每月以最新資料自動重訓；紅燈月份策略為全數持幣。投資一定有風險，請以可承受虧損之資金參與。
-    <br>產生時間 2026-06-11 23:48 ・ 本頁每月由作者手動更新一次
+    <br>產生時間 2026-06-11 23:54 ・ 本頁每月由作者手動更新一次
   </footer>
 </div>
 
@@ -1203,7 +1203,8 @@ async function getK(sid){
            下表只是模型當時的候選清單，灰色括號為「若持有」的假設值，僅供檢討濾網用。</div>` : "";
     mMonth.innerHTML = `${redBanner}<table class="ytable htable">
       <tr><th>排名</th><th>代號</th><th>狀態</th><th>期初價</th><th>期末價</th><th>${isRed?"假設損益":"本期損益"}</th><th></th></tr>${trs}</table>
-      <div class="note">「YYYY-MM 期」＝<b>上月底</b>調倉日買進 → <b>當月底</b>結算，損益就發生在當月（名實相符）。續抱股的真正進場點在更早期。價格為還原權息數值。</div>`;
+      <div class="note">「YYYY-MM 期」＝<b>上月底</b>調倉日買進 → <b>當月底</b>結算，損益就發生在當月（名實相符）。續抱股的真正進場點在更早期。價格為還原權息數值。</div>
+      <div class="note">📌 本表來自<b>跨體制驗證紀錄</b>（${h.window} 凍結模型，訓練截止於各驗證窗起點、絕不偷看未來）——與「本月持股」分頁的<b>上線模型</b>（每月重訓）是兩顆不同的模型，重疊期間清單會不同，這正是驗證誠實性的證明。</div>`;
     mMonth.style.display = "block";
     mStock.style.display = "none";
     btnBack.style.display = "none";
