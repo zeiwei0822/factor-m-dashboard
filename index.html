@@ -475,7 +475,7 @@
   <footer>
     <b>風險聲明</b>：本頁所有數字皆來自歷史回測（含 0.6%/筆 交易成本與漲停可行性檢驗），過去績效不代表未來表現。
     模型每月以最新資料自動重訓；紅燈月份策略為全數持幣。投資一定有風險，請以可承受虧損之資金參與。
-    <br>產生時間 2026-06-11 23:29 ・ 本頁每月由作者手動更新一次
+    <br>產生時間 2026-06-11 23:32 ・ 本頁每月由作者手動更新一次
   </footer>
 </div>
 
@@ -810,10 +810,10 @@ function renderPicks() {
 /* ── 三年實戰歷程 ── */
 (function(){
   if (!HIST.length) return;
-  let eqS=[1], eqP=[1], eqE=[1], x=[HIST[0].rebal_date];
+  let eqS=[1], eqT=[1], eqE=[1], x=[HIST[0].rebal_date];
   for (const r of HIST){
     eqS.push(eqS[eqS.length-1]*(1+r.ret_stable/100));
-    eqP.push(eqP[eqP.length-1]*(1+r.ret_pure/100));
+    eqT.push(eqT[eqT.length-1]*(1+r.taiex/100));
     eqE.push(eqE[eqE.length-1]*(1+r.etf/100));
     x.push(r.next_date);
   }
@@ -833,7 +833,7 @@ function renderPicks() {
     { x, y:eqS, name:"穩健版（紅燈空手・實際上線）", type:"scatter", mode:"lines",
       line:{color:"#34d399", width:2.6, shape:"hv"},
       fill:"tozeroy", fillcolor:"rgba(52,211,153,.05)" },
-    { x, y:eqP, name:"純版（永遠滿倉）", type:"scatter", mode:"lines",
+    { x, y:eqT, name:"加權指數", type:"scatter", mode:"lines",
       line:{color:"#60a5fa", width:1.1, dash:"dot"} },
     { x, y:eqE, name:"0050(含息)", type:"scatter", mode:"lines",
       line:{color:"#fbbf24", width:1.5, dash:"dash"} },
