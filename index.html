@@ -420,7 +420,7 @@
   <footer>
     <b>風險聲明</b>：本頁所有數字皆來自歷史回測（含 0.6%/筆 交易成本與漲停可行性檢驗），過去績效不代表未來表現。
     模型每月以最新資料自動重訓；紅燈月份策略為全數持幣。投資一定有風險，請以可承受虧損之資金參與。
-    <br>產生時間 2026-06-11 23:20 ・ 本頁每月由作者手動更新一次
+    <br>產生時間 2026-06-11 23:24 ・ 本頁每月由作者手動更新一次
   </footer>
 </div>
 
@@ -1113,9 +1113,9 @@ async function getK(sid){
     if (!ep) return ["", null];
     const isNew = ep[0] === h.rebal_date;
     const isOut = ep[1] === h.next_date;
-    if (isNew && isOut) return ["單月進出", ep];
-    if (isNew) return ["🆕 新進場", ep];
-    if (isOut) return ["🚪 本月出場", ep];
+    if (isNew && isOut) return ["⚡ 單期進出", ep];
+    if (isNew) return ["🆕 本期新買", ep];
+    if (isOut) return ["🚪 本期出場", ep];
     return ["⏳ 續抱", ep];
   }
 
